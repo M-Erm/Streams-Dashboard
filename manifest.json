@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Streams Dashboard",
+  "author": "Erm",
+  "version": "1.0",
+  "description": "Creates a Dashbard on a New tab, allowing the user to see if the channels they are subscribed to are online",
+  "icons": {"32": "icon.png"},
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "streams-dashboard@erm.dev",
+      "data_collection_permissions": {
+        "required": [],
+        "optional": []
+      }
+    }
+  },
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "New tab Layout",
+    "default_popup": "/popup/popup.html"
+  },
+
+  "chrome_url_overrides": {
+    "newtab": "/newtab/newtab.html"
+  },
+
+  "permissions": [
+    "storage"
+  ]
+}

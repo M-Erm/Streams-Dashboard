@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div id="popup-content">
+        <h1>New Tab Layout</h1>
+        <section id="vertical-container">
+            <section id="vertical-checkmarks">
+                <div id="checkbutton"><input type="checkbox" id="vertical-twitch" class="checkmark"><label for="vertical-twitch" class="buttontext">Vertical Twitch</label></div>
+            </section>
+            <section id="checkmarks">
+                <div id="checkbutton"><input type="checkbox" id="agenda" class="checkmark" checked><label for="agenda" class="buttontext">Agenda</label></div>
+                <div id="checkbutton"><input type="checkbox" id="twitch-streams" class="checkmark" checked><label for="twitch-streams" class="buttontext">Twitch Streams</label></div>
+                <div id="checkbutton"><input type="checkbox" id="youtube-streams" class="checkmark" checked><label for="agenda" class="buttontext">Youtube Streams</label></div>
+            </section>
+        </section>
+        <div id="mid-line"></div>
+        <section id="wallpapers">
+            <section id="horizontal-container">
+                <section id="section-name">
+                    <h2>Past Wallpapers</h2>
+                </section>
+                <section id="pastwallpapers">
+                    <button class="pastwallpaper"></button>
+                    <button class="pastwallpaper"></button>
+                    <button class="pastwallpaper"></button>
+                </section>
+            </section>
+            <section id="changewallpaper">
+                <button class="wallpaperbutton"> <h1 style="color: #141414; text-align: center;"> Select File </h1> </button>
+                <button class="wallpaperbutton"> <h1 style="color: #141414; text-align: center;"> Set BG </h1> </button>
+            </section>
+        </section>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

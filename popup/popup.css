@@ -1,0 +1,142 @@
+#popup-content {
+  display: flex;
+  width: 365px;
+  height: 350px;
+  background-color: #42414D;
+  flex-direction: column;
+}
+
+h1 {
+  color: white;
+  font-size: 18px;
+  text-align: start;
+  margin: 15px 30px 25px 10px;
+}
+
+h2 {
+  color: white;
+  font-size: 13px;
+  text-align: start;
+  margin: 5px 1px 17px 10px;
+}
+
+#vertical-container {
+  display: flex;
+  flex-direction: row;
+  flex: 3;
+}
+
+#vertical-checkmarks {
+  display: flex;
+  align-items: start;
+  width: 45%;
+  margin-left: 5%;
+}
+
+#checkmarks {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  flex-direction: column;
+  width: 55%;
+  margin-left: 20px;
+}
+
+#checkbutton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.checkmark {
+  border: none;
+  width: 23px;
+  height: 23px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+#wallpapers {
+  display: flex;
+  flex-direction: row;
+  flex: 2;
+  background-color: #302F39;
+}
+
+#mid-line {
+  width: 100%; 
+  height: 2px; 
+  background-color: white;
+}
+
+#section-name{
+  display: flex;
+}
+
+#horizontal-container {
+  display: flex;
+  flex-direction: column;
+  width: 65%;
+}
+
+#pastwallpapers {
+  display: flex;
+  flex-direction: row;
+  margin-left: 15px;
+  margin-right: 15px;
+  gap: 5px;
+}
+
+.pastwallpaper {
+  width: 80px;
+  height: auto;
+  aspect-ratio: 16/9;
+  background-color: white;
+}
+
+#changewallpaper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 1% auto;
+}
+
+.wallpaperbutton {
+  width: 100px;
+  height: fit-content;
+}
+
+button {
+  border: none;
+  width: 23px;
+  height: 23px;
+  margin: 1% auto;
+  cursor: pointer;
+  background-color: #f0f0f0;
+}
+
+.buttontext {
+  color: white;
+  text-wrap: nowrap;
+}
+
+button h1 {
+  margin: 0;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #bdbebe;
+}
+
+html, body {
+  display: flex;
+  background-color: black;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+}
+
+* {
+  margin: 0;
+}

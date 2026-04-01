@@ -1,0 +1,203 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-image: url(/logo/DefaultBackground.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center left;
+    background-color: transparent;
+    font-family: system-ui;
+    font-size: 12px;
+}
+
+main {
+    display: block;
+    padding-block-start: calc(calc(8 * 0.267rem) * 4);
+}
+
+.weather {
+    inset-inline-end: calc(8 * 0.267rem);
+    font-size: inherit;
+    display: inline-block;
+    position: absolute;
+    inset-block-start: calc(8 * 0.267rem);
+    margin-block-start: 0;
+    z-index: 1;
+}
+
+.weather-bar {
+    min-height: 55px;
+    margin-block-end: 0.267rem;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    border-radius: 8px;
+}
+
+.weatherinfo {
+    display: flex;
+    gap: calc(3 * 0.267rem);
+    padding: calc(2 * 0.267rem);
+
+    border-radius: 8px;
+
+    min-width: 130px;
+    max-width: 190px;
+    background-color: #42414d;
+    cursor: pointer;
+}
+
+.weatherIconCol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 32px;
+    height: 32px;
+    aspect-ratio: 1;
+}
+
+.weatherIcon {
+    width: 32px;
+    height: auto;
+    content: url("chrome://browser/skin/weather/night-clear.svg");
+    box-sizing: inherit;
+}
+
+#search-wrapper {
+    padding: 0;
+}
+
+#firefox-image-wordmark {
+    display: flex;
+    justify-content: center;
+    margin-block-end: calc(8 * 0.267rem);
+}
+
+#firefox-image-wordmark .image {
+    display: inline-block;
+    width: 64px;
+    height: 64px;
+    background: image-set(url("/logo/about-logo.png")) no-repeat center; 
+    background-size: 64px;
+}
+
+#firefox-image-wordmark .wordmark {
+    display: inline-block;
+    width: 105px;
+    height: 64px;
+    background-color: white;
+
+    mask: url("/logo/firefox-wordmark.svg") no-repeat center;
+    mask-size: contain;
+    margin-inline-start: calc(4*0.267rem);
+}
+
+#search-bar {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    border: 0;
+}
+
+#search {
+    background-color: #42414d;
+    width: 33%;
+    height: 40px;
+    outline: none;
+    border-radius: 7px;
+    border-color: transparent;
+    color: white;
+    font-size: 13px;
+
+    background-image: url('https://www.google.com/favicon.ico');
+    background-repeat: no-repeat;
+    background-position: 12px center;
+    background-size: 20px;
+    padding-inline-start: 52px;
+}
+
+#bars {
+    display: flex;
+    align-items: end;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.info-bar {
+    display: flex;
+    flex-direction: row;
+    border: 1px rgb(122, 141, 248) solid;
+    gap: 15px;
+    padding: 10px;
+    margin-right: 100px;
+    width: 810px; 
+    height: 170px;
+    background-color: black;
+    overflow: hidden;
+}
+
+.live {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 25%;
+    height: 100%;
+    min-width: 25%;
+}
+
+.live-thumb {
+    width: 100%;
+    flex: 2;
+    background-color: white;
+}
+
+.live-thumb img {
+  margin-right: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+#live-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+}
+
+.live-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* número de linhas */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    text-decoration: none;
+    color: rgb(215, 230, 228);
+}
+
+.streamtitle {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;      /* número de linhas */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+
+    text-decoration: none;
+    color: rgb(215, 230, 228);
+}
+
+.channelname {
+    height: fit-content;
+    text-decoration: none;
+    color: rgb(0, 191, 255);
+}
+
+hidden {
+    display: none;
+}
+
+showing {
+    display: inline;
+}
