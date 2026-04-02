@@ -32,14 +32,67 @@
         </div>
 
         <section id="bars">
-            <div id="youtube" class="info-bar"></div>
-            <div id="agenda" class="info-bar"></div>
-            <div id="twitch" class="info-bar"></div>
+            <div id="youtube" class="info-bar"> <div class="scroll-container"> </div> </div>
+            <div id="agenda" class="info-bar"> <div class="scroll-container"> </div></div>
+            <div id="twitch" class="info-bar"> <div class="scroll-container"> </div></div>
         </section>
 
-        <section id="Vertical-Twitch">
-
+        <section id="wallpaper-button">
+            <button id="wallpaper-btn">🪶</button>
         </section>
+
+        <div id="wallpaper-popup" class="modal-overlay hidden">
+            <div class="modal-card">
+                <button id="popup-close">✕</button>
+
+                <h1 id="title">Wallpapers</h1>
+
+            <section id="wallpapers">
+                <section id="horizontal-container">
+                    <section class="section-name">
+                        <h2>Past Wallpapers</h2>
+                    </section>
+                    <section id="pastwallpapers">
+                        <button class="slot" data-index="0"><span class="slot-label">Current</span></button>
+                        <button class="slot" data-index="1"><span class="slot-label">Slot 2</span></button>
+                        <button class="slot" data-index="2"><span class="slot-label">Slot 3</span></button>
+                    </section>
+                </section>
+            </section>
+
+            <section id="inputs">
+                <div class="input-group">
+                    <section class="section-name"> <h2> Image URL</h2> </section>
+                    <div class="input-row">
+                        <input type="text" id="url-input" placeholder="https://...">
+                        <button id="url-btn" class="action-btn">Set URL</button>
+                    </div>
+                </div>
+
+                <div class="input-group muted">
+                    <section class="section-name"> <h2> Wallpaper Site </h2> </section>
+                    <div class="input-row">
+                        <input type="text" placeholder="Integration coming soon..." disabled>
+                        <button class="action-btn" disabled>Connect</button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <section class="section-name"> <h2> From PC </h2> </section>
+                    <div class="input-row">
+                        <input type="file" id="file-input" accept="image/*" style="display:none">
+
+                        <label for="file-input" class="action-btn">Choose File</label>
+                        <span id="file-name" class="file-name-display">No file selected</span>
+                        <button id="file-set-btn" class="action-btn" disabled>Set</button>
+                    </div>
+                </div>
+            </section>
+
+            <div id="status"></div>
+            </div>
+        </div>
+
     </main>
 </body>
 </html>

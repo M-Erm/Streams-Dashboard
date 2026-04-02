@@ -5,7 +5,6 @@
 const checkboxes = document.querySelectorAll('input[type=checkbox]')
 
 checkboxes.forEach(element => {
-
   element.addEventListener("change", async () => {
 
     await chrome.storage.local.set({ 
@@ -14,7 +13,6 @@ checkboxes.forEach(element => {
     });
 
   });
-  
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
