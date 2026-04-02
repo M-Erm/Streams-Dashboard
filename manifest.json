@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Streams Dashboard",
+  "name": "NamaStream",
   "author": "Erm",
   "version": "1.0",
   "description": "Creates a Dashbard on a New tab, allowing the user to see if the channels they are subscribed to are online",
@@ -8,7 +8,7 @@
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "streams-dashboard@erm.dev",
+      "id": "NamaStream@erm.dev",
       "data_collection_permissions": {
         "required": [],
         "optional": []
