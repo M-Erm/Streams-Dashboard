@@ -2,9 +2,22 @@
 // Pega informações do Cloudflare workers (Backend) e renderiza na Nova Aba.  
 // ===========================================
 
+const firefox_el = document.getElementById('firefox-image-wordmark');
+const firefox_logo = firefox_el.querySelector('.image');
+const firefox_wordmark = firefox_el.querySelector('.wordmark');
+
+const search_bar = document.getElementById('search-bar').querySelector('input'); // Para desabilitar/habilitar
+
 const youtube = document.getElementById('youtube').querySelector('.scroll-container'); //Precisa do queryselector para pegar a div interna
-const agenda = document.getElementById('agenda').querySelector('.scroll-container');
+const agenda = document.getElementById('agenda').querySelector('.scroll-container'); // Para rolagem
 const twitch = document.getElementById('twitch').querySelector('.scroll-container');
+
+const bars = [
+    document.getElementById('youtube'),
+    document.getElementById('agenda'), // Para desabilitar/habilitar
+    document.getElementById('twitch')
+]
+
 
 const translations = {
     "en": {
@@ -30,7 +43,7 @@ const translations = {
 const userLanguage = navigator.language || 'en';
 const lang = translations[userLanguage] || translations['en'];
 
-let slots = [];
+let wallpaperSlots = [];
 let pendingFile = null;
 
 function drag(scrollContainer) 
@@ -84,39 +97,54 @@ function drag(scrollContainer)
 
 }
 
-function FilterStreams(videosResponse, twitchResponse)
+async function filterStreams(videosResponse, twitchResponse)
 {
     const ScheduledStreams = [];
     const HappeningStreams = [];
     const TwitchStreams = [];
-    let disabledChannels = new Set();
-    let pinnedChannels = [];
 
-  // Pega os canais desativados e fixados do storage
-    chrome.storage.local.get(['disabledChannels', 'pinnedChannels'], (result) => {
-        disabledChannels = new Set(result.disabledChannels || []);
-        pinnedChannels = result.pinnedChannels || [];
-    });
+    const { disabledChannels, pinnedChannels } = await chrome.storage.local.get(['disabledChannels', 'pinnedChannels']);
 
-    console.log("desabilitados:" + disabledChannels);
-    console.log("fixados:" + pinnedChannels);
 
     for (const response of videosResponse) {
         for (const video of response.items) {
-            if (!video.liveStreamingDetails) {
-                // Not a stream
+
+            if (disabledChannels.includes(video.snippet.channelId)) {
                 continue;
             }
-            if (video.liveStreamingDetails.actualStartTime && !video.liveStreamingDetails.actualEndTime) {
-                // Live NOW
+
+            if (!video.liveStreamingDetails) {
+                // Não for stream
+                continue;
+            }
+            else if (video.liveStreamingDetails.actualStartTime && !video.liveStreamingDetails.actualEndTime) {
+                // Tiver start mas não tiver end -> acontecendo agora
                 HappeningStreams.push(video);
             } else if (video.liveStreamingDetails.scheduledStartTime && !video.liveStreamingDetails.actualStartTime) {
-                // Upcoming Live
+                // tiver scheduled start mas não tiver start -> agendado
                 ScheduledStreams.push(video);
             }
-            // else = Past Live
         }
     } 
+
+    // Se a tá pinado (algo diferente de -1) e b não — a vem primeiro (retorna negativo). Se b tá pinado e a não — b vem primeiro (retorna positivo). 
+    ScheduledStreams.sort((a, b) => { 
+        if (pinnedChannels.indexOf(a.snippet.channelId) !== -1 && pinnedChannels.indexOf(b.snippet.channelId) === -1) {
+            return new Date(a.liveStreamingDetails.scheduledStartTime) - new Date(b.liveStreamingDetails.scheduledStartTime) - 1000000000;
+        } else if (pinnedChannels.indexOf(b.snippet.channelId) !== -1 && pinnedChannels.indexOf(a.snippet.channelId) === -1) {
+            return new Date(a.liveStreamingDetails.scheduledStartTime) - new Date(b.liveStreamingDetails.scheduledStartTime) + 1000000000;
+        }
+        return new Date(a.liveStreamingDetails.scheduledStartTime) - new Date(b.liveStreamingDetails.scheduledStartTime);
+    });
+
+    HappeningStreams.sort((a, b) => { 
+        if (pinnedChannels.indexOf(a.snippet.channelId) !== -1 && pinnedChannels.indexOf(b.snippet.channelId) === -1) {
+            return new Date(a.liveStreamingDetails.scheduledStartTime) - new Date(b.liveStreamingDetails.scheduledStartTime) - 1000000000; 
+        } else if (pinnedChannels.indexOf(b.snippet.channelId) !== -1 && pinnedChannels.indexOf(a.snippet.channelId) === -1) {
+            return new Date(a.liveStreamingDetails.scheduledStartTime) - new Date(b.liveStreamingDetails.scheduledStartTime) + 1000000000; 
+        }
+        return new Date(a.liveStreamingDetails.scheduledStartTime) - new Date(b.liveStreamingDetails.scheduledStartTime);
+    });
 
     for (const response of twitchResponse.data) {
         TwitchStreams.push(response);
@@ -131,9 +159,39 @@ function renderUIs(HappeningStreams, ScheduledStreams, TwitchStreams)
     let agendaHTML = '';
     let twitchHTML = '';
 
-    ScheduledStreams.sort((a, b) => {
-        return new Date(a.liveStreamingDetails.scheduledStartTime) - 
-            new Date(b.liveStreamingDetails.scheduledStartTime);
+    chrome.storage.local.get(['layout-firefox-logo', 'layout-firefox-wordmark', 'layout-search-bar'], (result) => {
+        firefox_logo.classList.toggle('hidden', result['layout-firefox-logo'] === false);
+        firefox_wordmark.classList.toggle('hidden', result['layout-firefox-wordmark'] === false);
+        search_bar.classList.toggle( 'hidden', result['layout-search-bar'] === false);
+    });
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local') {
+        if (changes['layout-firefox-logo']) {
+            firefox_logo.classList.toggle('hidden', changes['layout-firefox-logo'].newValue === false);
+        } else if (changes['layout-firefox-wordmark']) {
+            firefox_wordmark.classList.toggle('hidden', changes['layout-firefox-wordmark'].newValue === false);
+        } else if (changes['layout-search-bar']) {
+            search_bar.classList.toggle('hidden', changes['layout-search-bar'].newValue === false);
+        }
+    }});
+
+    chrome.storage.local.get(['agenda', 'youtube-streams', 'twitch-streams'], (result) => {
+        bars[0].classList.toggle('hidden', result['youtube-streams'] === false);
+        bars[1].classList.toggle('hidden', result['agenda'] === false);
+        bars[2].classList.toggle('hidden', result['twitch-streams'] === false);
+    });
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            if (changes['youtube-streams']) {
+                bars[0].classList.toggle('hidden', changes['youtube-streams'].newValue === false);
+            } else if (changes['agenda']) {
+                bars[1].classList.toggle('hidden', changes['agenda'].newValue === false);
+            } else if (changes['twitch-streams']) {
+                bars[2].classList.toggle('hidden', changes['twitch-streams'].newValue === false);
+            }
+        }
     });
 
     HappeningStreams.forEach(stream => {
@@ -233,54 +291,12 @@ function renderUIs(HappeningStreams, ScheduledStreams, TwitchStreams)
     agenda.innerHTML = agendaHTML;
     twitch.innerHTML = twitchHTML;
 }
-
-async function loadStreams() 
-{
-    try {
-        console.time('Tempo de Resposta');
-        const response = await fetch("https://holo-streams.migueloliv-dev.workers.dev/v2/youtube");
-        const twitchRes = await fetch("https://holo-streams.migueloliv-dev.workers.dev/v2/twitch");
-        console.timeEnd('Tempo de Resposta');
-
-        const videosResponse = await response.json();
-        const twitchResponse = await twitchRes.json();
-        const data = FilterStreams(videosResponse, twitchResponse);
-        renderUIs(data.HappeningStreams, data.ScheduledStreams, data.TwitchStreams);
-        drag(youtube);
-        drag(agenda);
-    } catch (err) {
-        console.error("Erro ao carregar streams:", err);
-    }
-}
-
-loadStreams();
-
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const result = await chrome.storage.local.get('wallpapers'); // Pega os wallpapers na cache
-    slots = result.wallpapers || []; // Se não tiver, inicia vazio
  
-    if (slots.length === 0) {
-        slots = [{ type: 'url', data: '/logo/DefaultBackground.png' }]; // wallpaper padrão
-        await chrome.storage.local.set({ wallpapers: slots });
-    }
- 
-    renderSlots();
-    bindSlotClicks();
-
-    if (slots[0]) {
-        document.documentElement.style.setProperty(
-            '--wallpaper-url',
-            `url(${slots[0].data})`
-        );
-    }
-});
- 
-function renderSlots() {
+function renderWallpaperSlots() {
     const slotEls = document.querySelectorAll('.slot');
  
     slotEls.forEach((el, index) => {
-        const slot = slots[index];
+        const slot = wallpaperSlots[index];
  
         if (slot) { // Se tiver index(wallpaper), renderiza. Se não, deixa vazio
             el.style.backgroundImage = `url(${slot.data})`;
@@ -299,20 +315,69 @@ function bindSlotClicks() { // Adiciona evento de click em cada slot para escolh
         el.addEventListener('click', async () => {
 
             const index = parseInt(el.dataset.index);
-            if (!slots[index]) return; // if slot vazio
+            if (!wallpaperSlots[index]) return; // if slot vazio
  
-            const chosen = slots.splice(index, 1)[0]; // remove de onde estava
-            slots.unshift(chosen); // coloca na frente
+            const chosen = wallpaperSlots.splice(index, 1)[0]; // remove de onde estava
+            wallpaperSlots.unshift(chosen); // coloca na frente
  
-            await chrome.storage.local.set({ wallpapers: slots }); // Salva a nova ORDEM na cache
+            await chrome.storage.local.set({ wallpapers: wallpaperSlots }); // Salva a nova ORDEM na cache
  
             document.querySelectorAll('.slot').forEach(s => s.classList.remove('active')); // Atualiza qual slot tem a borda ativa
             document.querySelector('.slot[data-index="0"]').classList.add('active');
  
-            renderSlots();
-            document.documentElement.style.setProperty('--wallpaper-url', `url(${slots[0].data})`);
+            renderWallpaperSlots();
+            document.documentElement.style.setProperty('--wallpaper-url', `url(${wallpaperSlots[0].data})`);
         });
     });
+}
+
+function compressImage(file, callback) { 
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d'); // Contexto para desenhar a imagem no canvas e depois extrair o base64 comprimido
+    const img = new Image();
+ 
+    img.onload = () => {
+        const maxWidth = 1920;
+        const scale = Math.min(1, maxWidth / img.width); // Se a imagem for maior que 1920px, reduz. Se for menor, mantém o tamanho original
+        canvas.width  = img.width  * scale; 
+        canvas.height = img.height * scale; 
+ 
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // 0 e 0 são as coordenadas de onde começa o desenho.
+ 
+        const base64 = canvas.toDataURL('image/jpeg', 0.85); // Comprime a imagem para JPEG com qualidade de 85%
+        callback(base64);
+        URL.revokeObjectURL(img.src); // Libera a memória usada para o objeto URL criado para a imagem, já que não é mais necessário após o carregamento e compressão.
+    };
+ 
+    img.src = URL.createObjectURL(file);
+}
+
+async function saveWallpaper(wallpaper) {
+    wallpaperSlots = [wallpaper, ...wallpaperSlots].slice(0, 3); // Slice faz com que só tenha 3 wallpapers, removendo o mais antigo se passar disso
+    await chrome.storage.local.set({ wallpapers: wallpaperSlots }); // Salva o WALLPAPER na cache
+    renderWallpaperSlots();
+
+    document.documentElement.style.setProperty('--wallpaper-url', `url(${wallpaper.data})`);
+}
+
+async function loadStreams() 
+{
+    try {
+        console.time('Tempo de Resposta');
+        const response = await fetch("https://holo-streams.migueloliv-dev.workers.dev/v2/youtube");
+        const twitchRes = await fetch("https://holo-streams.migueloliv-dev.workers.dev/v2/twitch");
+        console.timeEnd('Tempo de Resposta');
+
+        const videosResponse = await response.json();
+        const twitchResponse = await twitchRes.json();
+        const data = await filterStreams(videosResponse, twitchResponse);
+        renderUIs(data.HappeningStreams, data.ScheduledStreams, data.TwitchStreams);
+        drag(youtube);
+        drag(agenda);
+        drag(twitch);
+    } catch (err) {
+        console.error("Erro ao carregar streams:", err);
+    }
 }
  
 document.getElementById('url-btn').addEventListener('click', async () => {
@@ -350,40 +415,34 @@ document.getElementById('file-set-btn').addEventListener('click', () => {
         document.getElementById('file-set-btn').disabled = true;
     });
 });
- 
-function compressImage(file, callback) { 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d'); // Contexto para desenhar a imagem no canvas e depois extrair o base64 comprimido
-    const img = new Image();
- 
-    img.onload = () => {
-        const maxWidth = 1920;
-        const scale = Math.min(1, maxWidth / img.width); // Se a imagem for maior que 1920px, reduz. Se for menor, mantém o tamanho original
-        canvas.width  = img.width  * scale; 
-        canvas.height = img.height * scale; 
- 
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // 0 e 0 são as coordenadas de onde começa o desenho.
- 
-        const base64 = canvas.toDataURL('image/jpeg', 0.85); // Comprime a imagem para JPEG com qualidade de 85%
-        callback(base64);
-        URL.revokeObjectURL(img.src); // Libera a memória usada para o objeto URL criado para a imagem, já que não é mais necessário após o carregamento e compressão.
-    };
- 
-    img.src = URL.createObjectURL(file);
-}
-
-async function saveWallpaper(wallpaper) {
-    slots = [wallpaper, ...slots].slice(0, 3); // Slice faz com que só tenha 3 wallpapers, removendo o mais antigo se passar disso
-    await chrome.storage.local.set({ wallpapers: slots }); // Salva o WALLPAPER na cache
-    renderSlots();
-
-    document.documentElement.style.setProperty('--wallpaper-url', `url(${wallpaper.data})`);
-}
 
 document.getElementById('wallpaper-btn').addEventListener('click', () => {
     document.getElementById('wallpaper-popup').classList.remove('hidden');
 });
 
-document.getElementById('popup-close').addEventListener('click', () => {
+document.getElementById('wallpaper-close').addEventListener('click', () => {
     document.getElementById('wallpaper-popup').classList.add('hidden');
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    loadStreams();
+
+    const wallpaperCache = await chrome.storage.local.get('wallpapers');
+    wallpaperSlots = wallpaperCache.wallpapers || [];
+ 
+    if (wallpaperSlots.length === 0) {
+        wallpaperSlots = [{ type: 'url', data: '/logo/DefaultBackground.png' }];
+        await chrome.storage.local.set({ wallpapers: wallpaperSlots });
+    }
+
+    if (wallpaperSlots[0]) {
+        document.documentElement.style.setProperty(
+            '--wallpaper-url',
+            `url(${wallpaperSlots[0].data})`
+        );
+    }
+
+    renderWallpaperSlots();
+    bindSlotClicks();
 });

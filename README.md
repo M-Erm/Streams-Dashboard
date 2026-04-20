@@ -14,7 +14,10 @@
 
 ## Features
 
-> The actual version is not complete and misses some features, like Twitch Streams.
+Scheduled Youtube Streams
+Live Twitch Streams
+Pin / Disable Channels via Popup
+Change / Store Wallpapers
 
 ### Live right now
 - **Active streams panel** — Shows all VTubers currently live on YouTube with thumbnails, titles, and viewer counts
@@ -23,22 +26,45 @@
 - **Wallpaper support** — Set and save custom backgrounds via the extension popup
 
 ### Architecture highlights
-- Backend runs on **Cloudflare Workers** (Hono + TypeScript) — zero cold-start latency on the free plan
+- Backend runs on **Cloudflare Workers** (Hono + TypeScript) - almost zero cold-start latency on the free plan
 - Chunked parallel fetching to stay within Cloudflare's connection limits per request
-- In-memory caching with timestamp-based expiration to minimize YouTube API quota usage
-- API key never exposed to the client — all YouTube Data API calls go through the Worker
+- Cron-based cache refresh every 5~6 minutes
+- API key never exposed to the client - all YouTube Data API calls go through the Worker
 
 ## Roadmap
 
 - [X] Twitch live stream support -> Solved (V1.21)
-- [X] Horizontal → vertical layout toggle -> Solved (V1.21)
-- [ ] Mobile responsiveness
-- [ ] Extension popup with:
+- [X] Horizontal → vertical layout toggle -> Solved (V1.22)
+- [X] Extension popup with:
   - [x] Wallpaper picker (upload and persist) -> Solved (V1.1)
   - [X] Per-VTuber channel filtering (show/hide) -> Solved (V1.21)
   - [X] Starred channels pinned to the top of the dashboard -> Solved (V1.21)
-  - [ ] Optional live preview on thumbnail hover (iframe)
 - [X] Paginated/scrollable upcoming streams -> Solved (V1.1)
+
+## Changelogs
+
+### 1.0
+
+Youtube API Integration
+Dashboard (Scheduled And Live Streams)
+
+### 1.1
+
+Wallpaper Picker (Cache)
+Scrollable Bars
+
+### 1.21
+
+- Twitch API Integration
+- Cron (~5000ms -> 250ms)
+- Versionament (Mantain old Endpoint System)
+- Popup Layout Rework
+
+### 1.22
+
+- Disable and Pin Channels (Sort)
+- Popup Layout Section Rework
+- General Popup UI Changes
 
 ## Stack
 
@@ -47,7 +73,7 @@
 | Extension | HTML · CSS · Vanilla JS |
 | Backend | Cloudflare Workers · Hono · TypeScript |
 | Storage | Cloudflare KV |
-| API | YouTube Data API v3 |
+| API | YouTube Data API v3 and Twitch API |
 
 ## Development
 
@@ -57,6 +83,7 @@
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/) — `npm install -g wrangler`
 - A Google Cloud project with YouTube Data API v3 enabled
 - A Cloudflare account (free tier works)
+- A Twitch account
 
 ### Setup
 
@@ -71,7 +98,7 @@ npm install
 
 # Set your YouTube API key and Twitch Client Secret as Wrangler secrets
 wrangler secret put YOUTUBE_API_KEY
-wrangler secret put Client_Id #Optional
+wrangler secret put Client_Id
 wrangler secret put Client_Secret
 ```
 
@@ -92,14 +119,19 @@ To load the extension in Firefox:
 
 ```
 namastream/
-├── manifest.json          # Extension manifest (MV3)
+├── manifest.json # Extension manifest (MV3)
 ├── newtab/
-│   ├── index.html
-│   ├── style.css
-│   └── dashboard.js       # Fetches from the Worker, renders panels
+│   ├── newtab.html
+│   ├── newtab.css
+│   └── newtab.js       # Fetches from the Worker, renders panels
 ├── popup/
 │   ├── popup.html
+│   ├── popup.css
 │   └── popup.js
+├── logo/
+│   ├── DefaultBackground.png
+│   └── about-logo.png
+│   └── firefox-wordmark.svg
 └── API/                # Cloudflare Workers backend
     ├── src/
     │   └── index.ts       # Hono routes
@@ -107,13 +139,21 @@ namastream/
     │   └── twitchService.js   # Twitch API
     │   └── old.js             # Old API Functions
     │   └── cache.js           # Cache Backend System  
-    ├── wrangler.toml
+    ├── wrangler.jsonc
     └── package.json
+    └── tsconfig.json
+    └── worker-configuration.d.ts
 ```
 
 ## YouTube API & Legal
 
 This extension uses the [YouTube Data API v3](https://developers.youtube.com/youtube/v3). By using NamaStream, you agree to be bound by the [YouTube Terms of Service](https://www.youtube.com/t/terms).
+
+---
+
+## Twitch API & Legal
+
+This extension uses the [Twitch API](https://dev.twitch.tv/docs/api/). By using NamaStream, you agree to be bound by the [Twitch Terms of Service](https://legal.twitch.com/legal/developer-agreement/)
 
 ---
 
@@ -127,6 +167,7 @@ NamaStream does not collect, store, or transmit any personal data from users.
 - **No tracking:** There are no analytics, telemetry, or third-party trackers in the extension.
 - **No user data sent to the backend:** The Cloudflare Worker fetches public YouTube data on behalf of the browser. No personally identifiable information is sent to or logged by the Worker.
 - **YouTube Data API.** This extension uses YouTube API Services. YouTube may collect data as described in the [Google Privacy Policy](https://policies.google.com/privacy).
+- **Twitch API.** This extension uses Twitch API Services.
 - **Local storage:** Any user preferences (e.g., wallpaper selection, pinned channels) are stored locally in your browser via the Web Extensions storage API and never leave your device.
 
 For questions about privacy, open an issue in this repository.
@@ -139,4 +180,4 @@ For questions about privacy, open an issue in this repository.
 
 ---
 
-*NamaStream is an independent project and is not affiliated with or endorsed by Cover Corp., YouTube, or Google.*
+*NamaStream is an independent project and is not affiliated with or endorsed by Cover Corp., YouTube, Twitch or Google.*

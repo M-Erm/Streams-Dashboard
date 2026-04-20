@@ -19,6 +19,7 @@ const channels = [
     {name: "michimochievee"},
     {name: "michimochievee"},
     {name: "nyanners"},
+    {name: "chibidoki"},
 ]
 
 let token = null;

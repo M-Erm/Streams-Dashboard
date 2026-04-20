@@ -38,8 +38,8 @@ const channelIDs = [
   {name: "Ollie", channelId: "UCYz_5n-uDuChHtLo7My1HnQ"},
 ];
 
-let disabledChannels;
-let pinnedChannels;
+let disabledChannels = new Set();
+let pinnedChannels = [];
 
 const views = document.querySelectorAll('.view');
 const backBtn = document.getElementById('back-btn');
@@ -51,23 +51,20 @@ const viewTitles = {
     'view-layout':   'Layout',
 };
 
-document.querySelectorAll('#view-default .check-row input').forEach(checkbox => {
+document.querySelectorAll('#view-default .check-row input').forEach(checkbox => { // Troca a visibilidade das barras (On/Off) no storage e na UI
     checkbox.addEventListener('change', () => {
         chrome.storage.local.set({ [checkbox.id]: checkbox.checked });
-        changeRowVisibility();
+    });
+
+    chrome.storage.local.get(checkbox.id, (result) => {
+        if (result[checkbox.id] !== undefined) {
+            checkbox.checked = result[checkbox.id];
+        }
     });
 });
 
-function changeRowVisibility() {
-    // TODO: Troca a visibilidade da row no HTML
-}
 
-// ============ GRID CANAIS ===================================================================================================================================
-
-chrome.storage.local.get(['disabledChannels', 'pinnedChannels'], (result) => {
-    disabledChannels = new Set(result.disabledChannels || []);
-    pinnedChannels = result.pinnedChannels || [];
-});
+// ============ GRID CANAIS
 
 function renderChannelGrid() {
     const grid = document.getElementById('yt-channel-grid');
@@ -122,7 +119,7 @@ function renderChannelGrid() {
     });
 }
 
-// ============ SORT BY BRANCH ================================================================================================================================
+// ============ SORT BY BRANCH
 
 const sortToggle = document.getElementById('sort-by-branch');
 sortToggle.addEventListener('click', () => {
@@ -131,41 +128,17 @@ sortToggle.addEventListener('click', () => {
     // TODO: salvar no chrome.storage e aplicar na newtab
 });
 
-// ============ OPÇÕES DE LAYOUT ==============================================================================================================================
+// ============ OPÇÕES DE LAYOUT
 
 const layoutCheckboxes = document.querySelectorAll('#view-layout .check-row input');
 
-const previewLabels = {
-    'layout-streams-yt':     'Streams YT',
-    'layout-agenda':         'Agenda',
-    'layout-streams-twitch': 'Streams Twitch',
-    'layout-vertical-twitch': 'Vertical Twitch',
-};
-
-function changeLayoutPreview() {
-    const preview = document.getElementById('layout-preview');
-    preview.innerHTML = '';
-
-    layoutCheckboxes.forEach(checkbox => {
-        if (!checkbox.checked) return;
-
-        const block = document.createElement('div');
-        block.className = 'preview-block';
-        if (checkbox.id === 'layout-vertical-twitch') block.classList.add('preview-vertical');
-        block.textContent = previewLabels[checkbox.id];
-        preview.appendChild(block);
-    });
-
-    if (preview.children.length === 0) {
-        preview.innerHTML = '<span style="color:var(--text-dim); font-size:11px; margin:auto"> Nenhum elemento ativo</span>';
-    }
-}
-
 layoutCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', changeLayoutPreview);
+    checkbox.addEventListener('change', () => {
+        chrome.storage.local.set({ [checkbox.id]: checkbox.checked });
+    });
 });
 
-// ============ PADRÃO DO POPUP ===============================================================================================================================
+// ============ PADRÃO DO POPUP
 
 function renderPage(viewId) {
     views.forEach(view => view.classList.remove('active'));
@@ -184,9 +157,21 @@ backBtn.addEventListener('click', () => renderPage('view-default'));
 document.getElementById('close-btn').addEventListener('click', () => window.close());
 
 document.addEventListener('DOMContentLoaded', () => {
-
     renderPage('view-default');
-    renderChannelGrid();
-    changeLayoutPreview();
 
+    chrome.storage.local.get(['layout-vertical-twitch', 'layout-firefox-logo', 'layout-firefox-wordmark', 'layout-search-bar', 'layout-fixed-bar', 'layout-resizable-bar'], (result) => {
+        document.getElementById('layout-firefox-logo').checked = result['layout-firefox-logo'] || false;
+        document.getElementById('layout-firefox-wordmark').checked = result['layout-firefox-wordmark'] || false;
+        document.getElementById('layout-search-bar').checked = result['layout-search-bar'] || false;
+        document.getElementById('layout-vertical-twitch').checked = result['layout-vertical-twitch'] || false;
+        document.getElementById('layout-fixed-bar').checked = result['layout-fixed-bar'] || false;
+        document.getElementById('layout-resizable-bar').checked = result['layout-resizable-bar'] || false;
+    });
+
+    chrome.storage.local.get(['disabledChannels', 'pinnedChannels'], (result) => {
+        disabledChannels = new Set(result.disabledChannels || []);
+        pinnedChannels = result.pinnedChannels || [];
+        renderChannelGrid();
+        changeLayoutPreview();
+    });
 });
